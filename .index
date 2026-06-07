@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vocabulary Quiz Game</title>
+<style>
+  body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#fff3c4,#d9f7ff);margin:0;padding:20px;color:#1d2b53}
+  .box{max-width:900px;margin:auto;background:white;border-radius:22px;padding:25px;box-shadow:0 8px 25px #0002}
+  h1{text-align:center;color:#26357a;margin-bottom:5px}
+  .sub{text-align:center;color:#8a4b00;font-weight:bold;margin-bottom:20px}
+  .nameBox{text-align:center;margin:15px 0}
+  input{padding:12px;border:2px solid #26357a;border-radius:12px;font-size:16px;width:240px}
+  button{background:#26357a;color:white;border:0;border-radius:12px;padding:12px 18px;font-size:16px;font-weight:bold;cursor:pointer;margin:6px}
+  button:hover{background:#4155b5}
+  .question{font-size:22px;font-weight:bold;margin:20px 0}
+  .choices button{display:block;width:100%;text-align:left;background:#f4f6ff;color:#1d2b53;border:2px solid #dce2ff;margin:10px 0}
+  .choices button:hover{background:#e6ebff}
+  .correct{background:#d7ffd7!important;border-color:#2ca02c!important}
+  .wrong{background:#ffd7d7!important;border-color:#d62728!important}
+  .feedback{font-size:20px;font-weight:bold;margin-top:15px;min-height:28px}
+  .score{font-size:18px;font-weight:bold;text-align:right;color:#006b47}
+  .hidden{display:none}
+  .end{text-align:center;font-size:24px;font-weight:bold;color:#26357a}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Vocabulary for New Selection</h1>
+  <div class="sub">Learn the Words. Understand the Past!</div>
+
+  <div id="start">
+    <div class="nameBox">
+      <p><b>Enter your name:</b></p>
+      <input id="playerName" placeholder="Your name" />
+      <br><button onclick="startGame()">Start Quiz</button>
+    </div>
+  </div>
+
+  <div id="game" class="hidden">
+    <div class="score" id="scoreBox"></div>
+    <div class="question" id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button id="nextBtn" class="hidden" onclick="nextQuestion()">Next</button>
+  </div>
+
+  <div id="end" class="hidden">
+    <div class="end" id="finalScore"></div>
+    <button onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+{q:"Who studies the remains of ancient towns and cities?", c:["Historian","Archaeologist","Scientist","Artist"], a:"Archaeologist"},
+{q:"What is an era?", c:["A broken object","A person who writes books","A period of time in history","A museum"], a:"A period of time in history"},
+{q:"What are fragments?", c:["Whole objects","Ancient cities","Small broken pieces","Books"], a:"Small broken pieces"},
+{q:"A person who knows a great deal about history is called a:", c:["Teacher","Historian","Archaeologist","Builder"], a:"Historian"},
+{q:"If a vase is intact, it is:", c:["Broken","Missing","Complete and not broken","Old"], a:"Complete and not broken"},
+{q:"What does preserved mean?", c:["Hidden away","Protected from damage or decay","Broken apart","Rebuilt"], a:"Protected from damage or decay"},
+{q:"What does reconstruct mean?", c:["Destroy","Paint","Build or put back together","Discover"], a:"Build or put back together"},
+{q:"Remnants are:", c:["New objects","Small pieces left over","Ancient books","Maps"], a:"Small pieces left over"},
+{q:"The archaeologist discovered an ancient coin while digging. What does archaeologist mean?", c:["A person who studies ancient remains","A person who cooks","A person who paints","A person who drives"], a:"A person who studies ancient remains"},
+{q:"The Renaissance was an important era. What does era mean?", c:["A place","A time period","A small piece","A tool"], a:"A time period"},
+{q:"The earthquake left many pottery fragments. What are fragments?", c:["Broken pieces","Whole objects","People","Books"], a:"Broken pieces"},
+{q:"My grandfather is a historian. What does historian mean?", c:["Someone who studies history","Someone who fixes cars","Someone who grows plants","Someone who builds roads"], a:"Someone who studies history"},
+{q:"The ancient jar was found intact. What does intact mean?", c:["Not broken","Very dirty","Very small","Lost"], a:"Not broken"},
+{q:"The old manuscript was preserved in the museum. What does preserved mean?", c:["Kept safe","Thrown away","Painted blue","Broken"], a:"Kept safe"},
+{q:"Workers helped reconstruct the damaged temple. What does reconstruct mean?", c:["Put back together","Hide","Destroy","Study"], a:"Put back together"},
+{q:"Only a few remnants of the castle remain. What are remnants?", c:["Pieces left over","New buildings","Teachers","Maps"], a:"Pieces left over"},
+{q:"True or False: An archaeologist studies ancient remains.", c:["True","False"], a:"True"},
+{q:"True or False: Fragments are complete objects.", c:["True","False"], a:"False"},
+{q:"True or False: Intact means broken into pieces.", c:["True","False"], a:"False"},
+{q:"True or False: A historian studies history.", c:["True","False"], a:"True"},
+{q:"True or False: Preserved means protected from damage.", c:["True","False"], a:"True"},
+{q:"True or False: Reconstruct means to destroy something.", c:["True","False"], a:"False"},
+{q:"True or False: Remnants are pieces left behind.", c:["True","False"], a:"True"},
+{q:"True or False: An era is a type of building.", c:["True","False"], a:"False"},
+{q:"Which word means whole and not broken?", c:["Intact","Fragments","Era","Remnants"], a:"Intact"},
+{q:"Which word means small broken pieces?", c:["Fragments","Historian","Preserved","Era"], a:"Fragments"},
+{q:"Which word means protected from damage?", c:["Preserved","Reconstruct","Intact","Archaeologist"], a:"Preserved"},
+{q:"Which word means put back together?", c:["Reconstruct","Preserved","Fragments","Era"], a:"Reconstruct"},
+{q:"Which word means small pieces left over?", c:["Remnants","Era","Historian","Intact"], a:"Remnants"},
+{q:"Which person would most likely work at an ancient excavation site?", c:["Archaeologist","Doctor","Pilot","Chef"], a:"Archaeologist"},
+{q:"Which word best describes an ancient book kept safe in a museum?", c:["Preserved","Fragmented","Destroyed","Lost"], a:"Preserved"},
+{q:"Which word would describe the broken pieces of a plate?", c:["Fragments","Era","Historian","Intact"], a:"Fragments"},
+{q:"Which word means still complete after many years?", c:["Intact","Remnants","Era","Archaeologist"], a:"Intact"},
+{q:"Which word means rebuilding something to its original form?", c:["Reconstruct","Preserve","Discover","Fragment"], a:"Reconstruct"},
+{q:"The ruins of an old fort are examples of:", c:["Remnants","Eras","Historians","Books"], a:"Remnants"},
+{q:"Which word is a synonym for time period?", c:["Era","Intact","Remnant","Fragment"], a:"Era"},
+{q:"A museum might preserve an artifact so it stays:", c:["Safe","Broken","Lost","Dirty"], a:"Safe"},
+{q:"Choose the best sentence using archaeologist.", c:["The archaeologist dug carefully at the site.","The archaeologist baked a cake.","The archaeologist flew the airplane.","The archaeologist washed the car."], a:"The archaeologist dug carefully at the site."},
+{q:"Choose the best sentence using fragments.", c:["The cup fell and broke into fragments.","The fragments swam in the river.","The fragments wrote a book.","The fragments drove home."], a:"The cup fell and broke into fragments."},
+{q:"Choose the best sentence using intact.", c:["The statue was intact after many years.","The intact was eating lunch.","I intact my homework.","The intact ran fast."], a:"The statue was intact after many years."}
+];
+
+let shuffled = [];
+let index = 0;
+let score = 0;
+let player = "";
+
+function shuffle(arr){ return arr.sort(() => Math.random() - 0.5); }
+
+function startGame(){
+  player = document.getElementById('playerName').value.trim() || 'Student';
+  shuffled = shuffle([...questions]).map(x => ({...x, c: shuffle([...x.c])}));
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion(){
+  const item = shuffled[index];
+  document.getElementById('scoreBox').innerText = `${player} | Score: ${score}/${shuffled.length}`;
+  document.getElementById('question').innerText = `${index + 1}. ${item.q}`;
+  document.getElementById('feedback').innerText = '';
+  document.getElementById('nextBtn').classList.add('hidden');
+  const choicesDiv = document.getElementById('choices');
+  choicesDiv.innerHTML = '';
+  item.c.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.innerText = choice;
+    btn.onclick = () => checkAnswer(btn, choice);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(button, choice){
+  const item = shuffled[index];
+  const allButtons = document.querySelectorAll('.choices button');
+  allButtons.forEach(b => b.disabled = true);
+  if(choice === item.a){
+    score++;
+    button.classList.add('correct');
+    document.getElementById('feedback').innerText = '✅ Correct!';
+  } else {
+    button.classList.add('wrong');
+    document.getElementById('feedback').innerText = `❌ Wrong. Correct answer: ${item.a}`;
+    allButtons.forEach(b => { if(b.innerText === item.a) b.classList.add('correct'); });
+  }
+  document.getElementById('scoreBox').innerText = `${player} | Score: ${score}/${shuffled.length}`;
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function nextQuestion(){
+  index++;
+  if(index < shuffled.length){ showQuestion(); }
+  else { endGame(); }
+}
+
+function endGame(){
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('end').classList.remove('hidden');
+  let percent = Math.round((score / shuffled.length) * 100);
+  document.getElementById('finalScore').innerHTML = `Great job, ${player}!<br>Your score: ${score}/${shuffled.length} (${percent}%)`;
+}
+</script>
+</body>
+</html>
